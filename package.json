@@ -1,5 +1,5 @@
 {
-  "name": "world-recommendation-poster",
+  "name": "my-world-recommendation-poster",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/namanonamako/world-recommendation-poster.git"
+    "url": "git+https://github.com/Sewakana/my-world-discovery-poster"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/namanonamako/world-recommendation-poster/issues"
+    "url": "https://github.com/Sewakana/my-world-discovery-poster/issues"
   },
-  "homepage": "https://github.com/namanonamako/world-recommendation-poster#readme",
+  "homepage": "https://github.com/Sewakana/my-world-discovery-poster#readme",
   "dependencies": {
     "@napi-rs/canvas": "^0.1.44",
     "axios": "^1.6.2",
