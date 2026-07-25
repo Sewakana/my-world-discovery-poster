@@ -1,5 +1,10 @@
 # World Discover Poster (VRChat World紹介ポスター自動生成)
 
+## 重要
+
+このリポジトリはworld-discover-poster(下記)を私的利用のためにCloneしたものです。
+https://github.com/namanonamako/world-discover-poster
+
 X（旧Twitter）に投稿されたVRChatのワールド紹介ツイートを自動でキャプチャし、一枚のポスター画像（一覧画像）として合成・出力するシステムです。
 GitHub Actions と GitHub Pages を利用して、定期的な自動生成とデプロイを完全自動で行います。
 
