@@ -32,7 +32,6 @@ jobs:
         run: |
           PUPPETEER_SKIP_DOWNLOAD=true PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm ci
       - name: copyfiles
-        env:
         run: |
           for platform in PC Quest; do
             for i in {0..35}; do
