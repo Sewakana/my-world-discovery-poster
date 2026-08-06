@@ -205,7 +205,17 @@ async function create_basepic(platform_name, datas) {
                     if (status === "success") {
                         console.log(`${pic_count + 1}枚目の出力が完了しました`);
                         // ワールドIDを保存 (v2: worldId / v1: world_id)
-                        const worldId = datas[i].worldId || datas[i].world_id || "";
+                        let worldId = "";
+                        for (const url of datas[i].urls) {
+                            if (url.expandedUrl.includes("worldId=")) {
+                                const worldIdMatch = url.expandedUrl.match(/worldId=([^&]+)/);
+                                if (worldIdMatch) {
+                                    worldId = worldIdMatch[1];
+                                    break;
+                                }
+                            }
+                        }
+
                         world_id_array.push(worldId);
                         pic_count += 1;
                     } else if (status === "no_media") {
@@ -308,13 +318,14 @@ async function main() {
     if (fs.existsSync(sorce_json_file_path)) {
         const content = fs.readFileSync(sorce_json_file_path, "utf-8");
         console.log(content);
-        const posterData = JSON.parse(content);
+        const posterData = JSON.parse(content).timeline.entry;
         
         // v2: pcWorlds / v1: PCWorld
-        const pcData = posterData.pcWorlds || posterData.PCWorld || [];
+        // const pcData = posterData.pcWorlds || posterData.PCWorld || [];
         // v2: questWorlds / v1: QuestWorld
-        const questData = posterData.questWorlds || posterData.QuestWorld || [];
-        
+        // const questData = posterData.questWorlds || posterData.QuestWorld || [];
+        const pcData = posterData;
+        const questData = posterData;
         await create_basepic("PC", pcData);
         await create_basepic("Quest", questData);
     }
