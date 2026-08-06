@@ -1,6 +1,8 @@
 name: Publish GitHub Pages
 
 on:
+  schedule:
+    - cron: "*/30 * * * *"
   repository_dispatch:
     types: [build_and_deploy]
   workflow_dispatch: # 手動でも実行できるようにする
