@@ -44,7 +44,7 @@ jobs:
           done
           curl --retry-all-errors --retry 3 --retry-delay 2 -s -f -o work/posterInfo.json https://Sewakana.github.io/my-world-discovery-poster/posterInfo.json || rm -f work/posterInfo.json
           # v2 API
-          curl --retry-all-errors --retry 3 --retry-delay 2 -s -f -o work/posterData.json https://search.yahoo.co.jp/realtime/api/v1/pagination?p=VRChat_world&md=h&results=30&mtype=image
+          curl --retry-all-errors --retry 3 --retry-delay 2 -s -f -o work/posterData.json https://search.yahoo.co.jp/realtime/api/v1/pagination?p=VRChat_world&results=30&mtype=image
           find work -type f -empty -delete
       - name: Install multilingual fonts and locales
         run: |
