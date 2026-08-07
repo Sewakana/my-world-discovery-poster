@@ -303,7 +303,7 @@ async function create_poster_info_json() {
     json_data["QuestWorldID"] = Array.from({ length: MAX_TWEETPIC_NUM }, (value, index) => quest_world_ids_fixed[index] || "");
 
     json_data["ver"] = "v1.1";
-    json_data["message"] = "Tweetを30分毎に取得します\n<color=blue>#VRChat_world紹介</color>\n<color=green>#VRChat_quest_world</color>";
+    json_data["message"] = "Tweetを12時間毎に取得します\n<color=blue>#VRChat_world紹介</color>\n<color=green>#VRChat_quest_world</color>";
     const payload = JSON.stringify(json_data);
     try {
         await fs.promises.writeFile(json_file_path, payload);
