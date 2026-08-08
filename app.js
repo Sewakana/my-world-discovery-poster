@@ -12,6 +12,8 @@ console.log(`ロードされたブラックリスト: ${blackList}`);
 // タイルのサイズ
 const tileWidth = 550;
 const tileHeight = 800;
+const tweetIdMatch = datas[i].url.match(/status\/(\d+)/);
+
 /**
  * 保存したTweet画像をキャンバスに描画する
  * @param {any} context 描画対象のcontext
@@ -150,14 +152,37 @@ async function screenshot_tweet_pic(browser, tweetUrl, path, isDarkMode) {
 
 const MAX_TWEETPIC_NUM = 36;
 
+
+async function load_old_tweet_ids() {
+    const old_tweet_ids = new Set();
+    const old_json_file_path = "work/posterInfo.json";
+    if (fs.existsSync(old_json_file_path)) {
+        try {
+            const content = await fs.promises.readFile(old_json_file_path, "utf-8");
+            const infos = JSON.parse(content);
+            if (infos.PCTweetID) {
+                infos.PCTweetID.forEach(id => old_tweet_ids.add(id));
+            }
+            if (infos.QuestTweetID) {
+                infos.QuestTweetID.forEach(id => old_tweet_ids.add(id));
+            }
+        } catch (err) {
+            console.error("Failed to read old tweet IDs:", err.message);
+        }
+    }
+    return old_tweet_ids;
+}
+
 /**
  * 自サーバーからDLしたデータを使って各ツイートのキャプチャ画像を作る
  * @param {any} platform_name
  * @param {any} datas
+ * @param {Set} previousTweetIds 
  */
-async function create_basepic(platform_name, datas) {
+async function create_basepic(platform_name, datas, previousTweetIds = new Set()) {
     var pic_count = 0;
     const world_id_array = [];
+    const tweet_id_array = [];
     console.log(datas);
     let browser;
     try {
@@ -173,10 +198,13 @@ async function create_basepic(platform_name, datas) {
         for (let i = 0; i < datas.length; i++) {
             try {
                 if (pic_count >= MAX_TWEETPIC_NUM) break;
-
+                
                 const containsBlacklistWord = blackList.some(blackListID => datas[i].url.includes(blackListID));
+                const tweetId = tweetIdMatch ? tweetIdMatch[1] : "";
                 if (containsBlacklistWord) {
                     console.log(`BlackList対象です:${datas[i].url}`);
+                } else if (previousTweetIds.has(tweetId)){
+                    console.log(`前回取得済みのためスキップ: ${datas[i].url}`);
                 } else {
                     let status = "error";
                     for (let retry = 0; retry < 3; retry++) {
@@ -215,8 +243,15 @@ async function create_basepic(platform_name, datas) {
                                 }
                             }
                         }
-
+                        
                         world_id_array.push(worldId);
+                        
+                        // ツイートIDを保存
+                        const tweetIdMatch = datas[i].url.match(/status\/(\d+)/);
+                        if (tweetIdMatch) {
+                            tweet_id_array.push(tweetIdMatch[1]);
+                        }
+
                         pic_count += 1;
                     } else if (status === "no_media") {
                         console.log(`${datas[i].url} は画像が含まれていないためスキップします。`);
@@ -235,6 +270,7 @@ async function create_basepic(platform_name, datas) {
     console.log(world_id_array);
     const key = `${platform_name}WorldID`;
     json_data[key] = world_id_array;
+    json_data[`${platform_name}TweetID`] = tweet_id_array;
     // 前回更新分から足りない画像を移動
     const results = [];
     let moved_count = 0;
@@ -285,6 +321,8 @@ async function create_poster_info_json() {
 
     var pc_world_ids_fixed = json_data["PCWorldID"];
     var quest_world_ids_fixed = json_data["QuestWorldID"];
+    var pc_tweet_ids_fixed = json_data["PCTweetID"];
+    var quest_tweet_ids_fixed = json_data["QuestTweetID"];
 
     // 前回処理分の読み込み
     if (fs.existsSync(old_json_file_path)) {
@@ -293,6 +331,8 @@ async function create_poster_info_json() {
             const infos = JSON.parse(content);
             pc_world_ids_fixed = pc_world_ids_fixed.concat(infos.PCWorldID).slice(0, MAX_TWEETPIC_NUM);
             quest_world_ids_fixed = quest_world_ids_fixed.concat(infos.QuestWorldID).slice(0, MAX_TWEETPIC_NUM);
+            pc_tweet_ids_fixed = pc_tweet_ids_fixed.concat(infos.PCTweetID).slice(0, MAX_TWEETPIC_NUM);
+            quest_tweet_ids_fixed = quest_tweet_ids_fixed.concat(infos.QuestTweetID).slice(0, MAX_TWEETPIC_NUM);
         } catch (err) {
             console.error("Failed to read generic old json_file:", err.message);
         }
@@ -301,6 +341,9 @@ async function create_poster_info_json() {
     // 要素数を調整
     json_data["PCWorldID"] = Array.from({ length: MAX_TWEETPIC_NUM }, (value, index) => pc_world_ids_fixed[index] || "");
     json_data["QuestWorldID"] = Array.from({ length: MAX_TWEETPIC_NUM }, (value, index) => quest_world_ids_fixed[index] || "");
+    json_data["PCTweetID"] = Array.from({ length: MAX_TWEETPIC_NUM }, (value, index) => pc_tweet_ids_fixed[index] || "");
+    json_data["QuestTweetID"] = Array.from({ length: MAX_TWEETPIC_NUM }, (value, index) => quest_tweet_ids_fixed[index] || "");
+
 
     json_data["ver"] = "v1.1";
     json_data["message"] = "Tweetを12時間毎に取得します\n<color=blue>#VRChat_world紹介</color>\n<color=green>#VRChat_quest_world</color>";
@@ -324,10 +367,11 @@ async function main() {
         // const pcData = posterData.pcWorlds || posterData.PCWorld || [];
         // v2: questWorlds / v1: QuestWorld
         // const questData = posterData.questWorlds || posterData.QuestWorld || [];
+        const old_tweet_ids = await load_old_tweet_ids();
         const pcData = posterData;
         const questData = posterData;
-        await create_basepic("PC", pcData);
-        await create_basepic("Quest", questData);
+        await create_basepic("PC", pcData, old_tweet_ids);
+        await create_basepic("Quest", questData, old_tweet_ids);
     }
 
     for (let i = 0; i < 6; i++) {
