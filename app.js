@@ -12,7 +12,6 @@ console.log(`ロードされたブラックリスト: ${blackList}`);
 // タイルのサイズ
 const tileWidth = 550;
 const tileHeight = 800;
-const tweetIdMatch = datas[i].url.match(/status\/(\d+)/);
 
 /**
  * 保存したTweet画像をキャンバスに描画する
@@ -200,6 +199,7 @@ async function create_basepic(platform_name, datas, previousTweetIds = new Set()
                 if (pic_count >= MAX_TWEETPIC_NUM) break;
                 
                 const containsBlacklistWord = blackList.some(blackListID => datas[i].url.includes(blackListID));
+                const tweetIdMatch = datas[i].url.match(/status\/(\d+)/);
                 const tweetId = tweetIdMatch ? tweetIdMatch[1] : "";
                 if (containsBlacklistWord) {
                     console.log(`BlackList対象です:${datas[i].url}`);
