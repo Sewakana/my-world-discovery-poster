@@ -154,7 +154,7 @@ const MAX_TWEETPIC_NUM = 36;
 
 async function load_old_tweet_ids() {
     const old_tweet_ids = new Set();
-    const old_json_file_path = "work/posterInfo.json";
+    const old_json_file_path = path.join("work", "posterInfo.json");
     if (fs.existsSync(old_json_file_path)) {
         try {
             const content = await fs.promises.readFile(old_json_file_path, "utf-8");
@@ -315,8 +315,8 @@ var json_data = {};
 /** ポスターから参照する情報を保持したJsonの作成 */
 
 async function create_poster_info_json() {
-    const old_json_file_path = "work/posterInfo.json";
-    const json_file_path = "images/posterInfo.json";
+    const old_json_file_path = path.join("work", "posterInfo.json");
+    const json_file_path = path.join("images", "posterInfo.json");
 
 
     var pc_world_ids_fixed = json_data["PCWorldID"];
@@ -329,10 +329,10 @@ async function create_poster_info_json() {
         try {
             const content = await fs.promises.readFile(old_json_file_path, "utf-8");
             const infos = JSON.parse(content);
-            pc_world_ids_fixed = pc_world_ids_fixed.concat(infos.PCWorldID).slice(0, MAX_TWEETPIC_NUM);
-            quest_world_ids_fixed = quest_world_ids_fixed.concat(infos.QuestWorldID).slice(0, MAX_TWEETPIC_NUM);
-            pc_tweet_ids_fixed = pc_tweet_ids_fixed.concat(infos.PCTweetID).slice(0, MAX_TWEETPIC_NUM);
-            quest_tweet_ids_fixed = quest_tweet_ids_fixed.concat(infos.QuestTweetID).slice(0, MAX_TWEETPIC_NUM);
+            pc_world_ids_fixed = pc_world_ids_fixed.concat(infos.PCWorldID || []).slice(0, MAX_TWEETPIC_NUM);
+            quest_world_ids_fixed = quest_world_ids_fixed.concat(infos.QuestWorldID || []).slice(0, MAX_TWEETPIC_NUM);
+            pc_tweet_ids_fixed = pc_tweet_ids_fixed.concat(infos.PCTweetID || []).slice(0, MAX_TWEETPIC_NUM);
+            quest_tweet_ids_fixed = quest_tweet_ids_fixed.concat(infos.QuestTweetID || []).slice(0, MAX_TWEETPIC_NUM);
         } catch (err) {
             console.error("Failed to read generic old json_file:", err.message);
         }
@@ -382,7 +382,7 @@ async function main() {
 
     }
 
-    create_poster_info_json();
+    await create_poster_info_json();
 }
 // #regiton test
 
